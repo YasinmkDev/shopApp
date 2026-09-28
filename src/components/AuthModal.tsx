@@ -14,6 +14,8 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import { useShop } from '@/context/ShopContext';
 import { Colors, Spacing, BorderRadius, Shadows } from '@/constants/theme';
+import { LEGAL_CONFIG, openLegalUrl } from '@/constants/legal';
+
 
 interface AuthModalProps {
   visible: boolean;
@@ -313,8 +315,20 @@ export const AuthModal: React.FC<AuthModalProps> = ({ visible, onClose }) => {
                 </Pressable>
 
                 <Text style={[styles.privacyNote, { color: theme.textMuted }]}>
-                  🔒 Encrypted and secured via Firebase Authentication & Cloud Firestore.
+                  🔒 Encrypted and secured via Firebase Authentication.
                 </Text>
+
+                <View style={styles.legalRow}>
+                  <Text style={[styles.legalText, { color: theme.textMuted }]}>By continuing, you agree to our </Text>
+                  <Pressable onPress={() => openLegalUrl(LEGAL_CONFIG.privacyPolicyUrl)}>
+                    <Text style={[styles.legalLink, { color: theme.primary }]}>Privacy Policy</Text>
+                  </Pressable>
+                  <Text style={[styles.legalText, { color: theme.textMuted }]}> & </Text>
+                  <Pressable onPress={() => openLegalUrl(LEGAL_CONFIG.termsOfServiceUrl)}>
+                    <Text style={[styles.legalLink, { color: theme.primary }]}>Terms</Text>
+                  </Pressable>
+                </View>
+
               </View>
             )}
           </ScrollView>
@@ -330,7 +344,8 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(0, 0, 0, 0.55)',
     justifyContent: 'center',
     alignItems: 'center',
-    padding: Spacing.lg,
+    paddingHorizontal: 16,
+    paddingVertical: 16,
   },
   backdropPress: {
     position: 'absolute',
@@ -341,47 +356,48 @@ const styles = StyleSheet.create({
   },
   modalCard: {
     width: '100%',
-    maxWidth: 480,
+    maxWidth: 400,
+    alignSelf: 'center',
     borderRadius: BorderRadius.xl,
     borderWidth: 1,
     overflow: 'hidden',
-    ...Shadows.lg,
+    ...Shadows.md,
     maxHeight: '90%',
   },
   headerRow: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingHorizontal: Spacing.xl,
-    paddingVertical: Spacing.lg,
+    paddingHorizontal: 14,
+    paddingVertical: 12,
     borderBottomWidth: 1,
   },
   headerTitleWrap: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: Spacing.md,
+    gap: 10,
     flex: 1,
   },
   cloudBadge: {
-    width: 42,
-    height: 42,
+    width: 36,
+    height: 36,
     borderRadius: BorderRadius.full,
     alignItems: 'center',
     justifyContent: 'center',
   },
   headerTitle: {
-    fontSize: 16,
+    fontSize: 15,
     fontWeight: '800',
     letterSpacing: -0.2,
   },
   headerSub: {
-    fontSize: 12,
-    marginTop: 2,
+    fontSize: 11,
+    marginTop: 1,
     fontWeight: '500',
   },
   closeButton: {
-    width: 32,
-    height: 32,
+    width: 28,
+    height: 28,
     borderRadius: BorderRadius.full,
     alignItems: 'center',
     justifyContent: 'center',
@@ -390,14 +406,14 @@ const styles = StyleSheet.create({
     flexShrink: 1,
   },
   bodyContent: {
-    padding: Spacing.xl,
-    gap: Spacing.lg,
+    padding: 14,
+    gap: 12,
   },
   banner: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: Spacing.sm,
-    padding: Spacing.md,
+    padding: 10,
     borderRadius: BorderRadius.md,
   },
   errorBanner: {
@@ -407,7 +423,7 @@ const styles = StyleSheet.create({
   },
   errorBannerText: {
     color: '#991B1B',
-    fontSize: 13,
+    fontSize: 12,
     fontWeight: '600',
     flex: 1,
   },
@@ -418,59 +434,60 @@ const styles = StyleSheet.create({
   },
   successBannerText: {
     color: '#166534',
-    fontSize: 13,
+    fontSize: 12,
     fontWeight: '600',
     flex: 1,
   },
   // Signed out view
   signedOutContent: {
-    gap: Spacing.xl,
+    gap: 14,
   },
   benefitsList: {
-    gap: Spacing.md,
+    gap: 8,
   },
   benefitItem: {
     flexDirection: 'row',
     alignItems: 'flex-start',
-    gap: Spacing.md,
+    gap: 10,
   },
   benefitIcon: {
-    width: 36,
-    height: 36,
-    borderRadius: BorderRadius.md,
+    width: 30,
+    height: 30,
+    borderRadius: BorderRadius.sm,
     alignItems: 'center',
     justifyContent: 'center',
-    marginTop: 2,
+    marginTop: 1,
   },
   benefitTextWrap: {
     flex: 1,
   },
   benefitTitle: {
-    fontSize: 14,
+    fontSize: 12,
     fontWeight: '700',
   },
   benefitDesc: {
-    fontSize: 12,
-    marginTop: 2,
-    lineHeight: 17,
+    fontSize: 11,
+    marginTop: 1,
+    lineHeight: 15,
   },
   googleLoginBtn: {
     backgroundColor: '#1E293B',
-    paddingVertical: 14,
-    paddingHorizontal: Spacing.lg,
-    borderRadius: BorderRadius.lg,
+    paddingVertical: 10,
+    paddingHorizontal: 12,
+    borderRadius: BorderRadius.md,
     alignItems: 'center',
     justifyContent: 'center',
-    ...Shadows.md,
+    ...Shadows.sm,
   },
   googleBtnInner: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: Spacing.md,
+    justifyContent: 'center',
+    gap: 8,
   },
   googleIconBox: {
-    width: 28,
-    height: 28,
+    width: 22,
+    height: 22,
     borderRadius: BorderRadius.full,
     backgroundColor: '#FFFFFF',
     alignItems: 'center',
@@ -478,15 +495,31 @@ const styles = StyleSheet.create({
   },
   googleLoginBtnText: {
     color: '#FFFFFF',
-    fontSize: 15,
+    fontSize: 13,
     fontWeight: '700',
-    letterSpacing: 0.2,
+    letterSpacing: 0.1,
   },
   privacyNote: {
-    fontSize: 11,
+    fontSize: 10,
     textAlign: 'center',
-    marginTop: -4,
+    marginTop: -2,
   },
+  legalRow: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: -2,
+  },
+  legalText: {
+    fontSize: 11,
+  },
+  legalLink: {
+    fontSize: 11,
+    fontWeight: '600',
+    textDecorationLine: 'underline',
+  },
+
   // Signed in view
   signedInContent: {
     gap: Spacing.lg,
@@ -573,13 +606,13 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     gap: Spacing.sm,
-    paddingVertical: 13,
-    borderRadius: BorderRadius.lg,
+    paddingVertical: 10,
+    borderRadius: BorderRadius.md,
     ...Shadows.sm,
   },
   syncNowBtnText: {
     color: '#FFFFFF',
-    fontSize: 14,
+    fontSize: 13,
     fontWeight: '700',
   },
   signOutBtn: {
@@ -587,12 +620,12 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     gap: Spacing.sm,
-    paddingVertical: 12,
-    borderRadius: BorderRadius.lg,
+    paddingVertical: 9,
+    borderRadius: BorderRadius.md,
     borderWidth: 1,
   },
   signOutBtnText: {
-    fontSize: 13,
+    fontSize: 12,
     fontWeight: '700',
   },
 });

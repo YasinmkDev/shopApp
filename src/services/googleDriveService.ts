@@ -1,4 +1,4 @@
-import { Platform } from 'react-native';
+import { Platform, TurboModuleRegistry } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as WebBrowser from 'expo-web-browser';
 import * as AuthSession from 'expo-auth-session';
@@ -62,9 +62,22 @@ class GoogleDriveService {
   }
 
   /**
-   * Disconnect and clear local token cache
+   * Disconnect and clear local token cache.
+   * If revokeToken is true, actively revokes the OAuth2 token with Google.
    */
-  async disconnect(): Promise<void> {
+  async disconnect(revokeToken: boolean = false): Promise<void> {
+    try {
+      const auth = this.currentAuth || (await this.getSavedAuth());
+      if (revokeToken && auth?.accessToken) {
+        await fetch(`https://oauth2.googleapis.com/revoke?token=${encodeURIComponent(auth.accessToken)}`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        });
+      }
+    } catch (err) {
+      console.warn('[GoogleDriveService] Token revocation notice (ignored):', err);
+    }
+
     this.currentAuth = null;
     this.folderCache = null;
     await AsyncStorage.removeItem(GOOGLE_DRIVE_CONFIG.storageKey);
@@ -133,6 +146,46 @@ class GoogleDriveService {
         }
         return { success: false, error: 'Google Drive authorization was cancelled or failed.' };
       } else {
+        // --- Mobile (Android & iOS): Native Google Play Services SDK ---
+        const hasNativeGoogleSignin =
+          TurboModuleRegistry?.get ? TurboModuleRegistry.get('RNGoogleSignin') != null : false;
+
+        if (hasNativeGoogleSignin) {
+          try {
+            const { GoogleSignin } = await import('@react-native-google-signin/google-signin');
+            await GoogleSignin.hasPlayServices({ showPlayServicesUpdateDialog: true });
+
+            try {
+              await GoogleSignin.addScopes({
+                scopes: GOOGLE_DRIVE_CONFIG.scopes,
+              });
+            } catch (scopeErr) {
+              console.warn('[GoogleDriveService] addScopes fallback, attempting signIn:', scopeErr);
+              await GoogleSignin.signIn();
+            }
+
+            const tokens = await GoogleSignin.getTokens();
+            const currentUser = GoogleSignin.getCurrentUser();
+
+            if (tokens.accessToken) {
+              const driveUser: GoogleDriveAuth = {
+                accessToken: tokens.accessToken,
+                email: currentUser?.user?.email || undefined,
+                name: currentUser?.user?.name || undefined,
+                picture: currentUser?.user?.photo || undefined,
+                expiresAt: Date.now() + 3500 * 1000,
+              };
+              await this.saveAuth(driveUser);
+              this.ensureFolders(driveUser.accessToken).catch(console.warn);
+              return { success: true, user: driveUser };
+            }
+          } catch (nativeErr: any) {
+            console.warn('[GoogleDriveService] Native Google Sign-In fallback to WebBrowser:', nativeErr);
+          }
+        }
+
+        // Browser Fallback (if native is unavailable)
+
         const authResponse = await WebBrowser.openAuthSessionAsync(authUrl, redirectUri);
         if (authResponse.type === 'success' && authResponse.url) {
           const auth = this.extractTokenFromUrl(authResponse.url);
@@ -508,26 +561,9 @@ class GoogleDriveService {
 
     // Cache the original image for instant offline and refresh display
     ImageCacheService.set(fileId, imageUri).catch(() => {});
+    // 4. Return standard file reference (resolved privately via resolveDriveImageUrl with user auth)
+    return `https://drive.google.com/thumbnail?id=${fileId}&sz=w800`;
 
-    // 4. Set public read permission if allowed (optional)
-    try {
-      await fetch(`https://www.googleapis.com/drive/v3/files/${fileId}/permissions`, {
-        method: 'POST',
-        headers: {
-          Authorization: `Bearer ${auth.accessToken}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          role: 'reader',
-          type: 'anyone',
-        }),
-      });
-    } catch (permErr) {
-      console.warn('[GoogleDriveService] Setting public permission failed (optional):', permErr);
-    }
-
-    // Direct Google CDN image display link
-    return `https://lh3.googleusercontent.com/d/${fileId}`;
   }
 
   /**

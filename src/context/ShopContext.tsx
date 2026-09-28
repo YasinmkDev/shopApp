@@ -33,6 +33,7 @@ import {
   signOutUser, 
   subscribeToAuth, 
   checkRedirectAuth, 
+  deleteCurrentUserAccount,
   AuthResult 
 } from '@/services/authService';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -107,6 +108,7 @@ interface ShopContextType {
   pendingSyncCount: number;
   signInWithGoogle: () => Promise<AuthResult>;
   logout: () => Promise<void>;
+  deleteAccount: () => Promise<{ success: boolean; error?: string }>;
   syncNow: () => Promise<{ success: boolean; error?: string }>;
   isGuestMode: boolean;
   setIsGuestMode: (val: boolean) => void;
@@ -710,6 +712,27 @@ export const ShopProvider: React.FC<{ children: React.ReactNode }> = ({ children
     ]);
   }, [refreshProducts, refreshSales, refreshKhata, refreshPendingCount]);
 
+  const deleteAccount = useCallback(async (): Promise<{ success: boolean; error?: string }> => {
+    const currentUid = user?.uid;
+    const res = await deleteCurrentUserAccount();
+    if (!res.success) {
+      return res;
+    }
+    if (currentUid) {
+      try {
+        await AsyncStorage.removeItem(`@shopkeeper_drive_onboarded_${currentUid}`);
+      } catch (e) {
+        console.warn('[ShopContext] Error clearing drive onboarding flag:', e);
+      }
+    }
+    await clearStoreData();
+    await SettingsRepository.setGuestMode(false).catch(() => {});
+    setUser(null);
+    setIsGuestMode(false);
+    setSyncStatus('idle');
+    return { success: true };
+  }, [user?.uid, clearStoreData]);
+
   const resetToSampleData = useCallback(async () => {
     await MigrationService.purgeDummyDataIfNeeded();
     await SyncQueueService.clear();
@@ -957,6 +980,7 @@ export const ShopProvider: React.FC<{ children: React.ReactNode }> = ({ children
       pendingSyncCount,
       signInWithGoogle,
       logout,
+      deleteAccount,
       syncNow,
       isGuestMode,
       setIsGuestMode,
@@ -1018,6 +1042,7 @@ export const ShopProvider: React.FC<{ children: React.ReactNode }> = ({ children
       pendingSyncCount,
       signInWithGoogle,
       logout,
+      deleteAccount,
       syncNow,
       isGuestMode,
       continueAsGuest,

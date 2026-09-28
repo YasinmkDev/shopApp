@@ -88,16 +88,6 @@ export const DashboardScreen: React.FC = () => {
             </View>
           </Pressable>
         </View>
-
-        <Pressable
-          onPress={() => setActiveTab('sale')}
-          style={({ pressed }) => [
-            styles.heroCTA,
-            pressed && { opacity: 0.88, transform: [{ scale: 0.97 }] },
-          ]}>
-          <Ionicons name="cart" size={16} color={theme.heroBg} />
-          <Text style={[styles.heroCTAText, { color: theme.heroBg }]}>{t('newBillBtn')}</Text>
-        </Pressable>
       </View>
 
 
@@ -324,8 +314,8 @@ export const DashboardScreen: React.FC = () => {
 
       <View style={styles.quickGrid}>
         {[
-          { label: t('newBillBtn'), icon: 'cart' as const, color: theme.primary, onPress: () => setActiveTab('sale') },
           { label: t('addProductBtn'), icon: 'add-circle' as const, color: theme.secondary, onPress: () => setIsAddProductOpen(true) },
+          { label: t('products'), icon: 'cube' as const, color: theme.primary, onPress: () => setActiveTab('products') },
           { label: t('khataBtn'), icon: 'book' as const, color: theme.accent, onPress: () => setActiveTab('khata') },
           { label: t('history'), icon: 'time' as const, color: '#7C3AED', onPress: () => setActiveTab('history') },
         ].map((tile) => (
@@ -358,8 +348,7 @@ export const DashboardScreen: React.FC = () => {
           icon="receipt-outline"
           title={t('noRecentSales')}
           subtitle={language === 'ur' ? 'پہلا بل بنانے کے لیے نیچے بٹن دبائیں' : 'Create your first bill to get started.'}
-          actionLabel={t('newBillBtn')}
-          onAction={() => setActiveTab('sale')}
+          compact
         />
       ) : (
         <View style={styles.recentSalesList}>
@@ -442,7 +431,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'flex-start',
-    marginBottom: Spacing.xl,
+    marginBottom: 0,
   },
   heroLeft: { flex: 1, gap: 3 },
   heroGreet: { color: 'rgba(255,255,255,0.75)', fontSize: 13, fontWeight: '500' },
@@ -482,12 +471,13 @@ const styles = StyleSheet.create({
   metricsGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    gap: Spacing.md,
+    justifyContent: 'space-between',
+    rowGap: Spacing.md,
+    columnGap: Spacing.md,
     marginBottom: Spacing.lg,
   },
   metricCard: {
-    flex: 1,
-    minWidth: '45%',
+    width: '48%',
     borderRadius: BorderRadius.lg,
     borderWidth: 1,
     overflow: 'hidden',
@@ -521,12 +511,13 @@ const styles = StyleSheet.create({
   quickGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    gap: Spacing.md,
+    justifyContent: 'space-between',
+    rowGap: Spacing.md,
+    columnGap: Spacing.md,
     marginBottom: Spacing.xl,
   },
   quickTile: {
-    flex: 1,
-    minWidth: '45%',
+    width: '48%',
     paddingVertical: Spacing.lg,
     paddingHorizontal: Spacing.lg,
     borderRadius: BorderRadius.xl,

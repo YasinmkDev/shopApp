@@ -20,7 +20,8 @@ import { CameraModal } from '@/components/CameraModal';
 import { buildImportTemplateJSON } from '@/constants/sampleData';
 import * as Linking from 'expo-linking';
 import { googleDriveService, GoogleDriveAuth } from '@/services/googleDriveService';
-import { GOOGLE_DRIVE_CONFIG } from '@/config/googleDrive';
+import { LEGAL_CONFIG, openLegalUrl } from '@/constants/legal';
+
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 type Segment = 'profile' | 'settings';
@@ -118,6 +119,7 @@ export const SettingsScreen: React.FC = () => {
     syncStatus,
     signInWithGoogle,
     logout,
+    deleteAccount,
     syncNow,
     setIsAuthModalOpen,
   } = useShop();
@@ -127,6 +129,8 @@ export const SettingsScreen: React.FC = () => {
   const [activeSegment, setActiveSegment] = useState<Segment>('profile');
   const [isCameraOpen, setIsCameraOpen] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+  const [isDeletingAccount, setIsDeletingAccount] = useState(false);
+
   const [showImportBox, setShowImportBox] = useState(false);
   const [importJsonText, setImportJsonText] = useState('');
   const [googleLoading, setGoogleLoading] = useState(false);
@@ -363,6 +367,61 @@ export const SettingsScreen: React.FC = () => {
       ]);
     }
   };
+
+  const handleDeleteAccount = () => {
+    const confirmMsg = t('deleteAccountConfirm');
+
+    const executeDeletion = async () => {
+      try {
+        setIsDeletingAccount(true);
+        const res = await deleteAccount();
+        if (!res.success) {
+          const errMsg = res.error || 'Failed to delete account';
+          if (Platform.OS === 'web') {
+            window.alert(errMsg);
+          } else {
+            Alert.alert(t('error'), errMsg);
+          }
+        } else {
+          const successMsg = t('deleteAccountSuccess');
+          if (Platform.OS === 'web') {
+            window.alert(successMsg);
+          } else {
+            Alert.alert(t('success'), successMsg);
+          }
+        }
+      } catch (err: any) {
+        const errMsg = err?.message || 'Failed to delete account';
+        if (Platform.OS === 'web') {
+          window.alert(errMsg);
+        } else {
+          Alert.alert(t('error'), errMsg);
+        }
+      } finally {
+        setIsDeletingAccount(false);
+      }
+    };
+
+    if (Platform.OS === 'web') {
+      if (window.confirm(confirmMsg)) {
+        executeDeletion();
+      }
+    } else {
+      Alert.alert(
+        t('warningAlert'),
+        confirmMsg,
+        [
+          { text: t('cancel'), style: 'cancel' },
+          {
+            text: t('deleteAccount'),
+            style: 'destructive',
+            onPress: executeDeletion,
+          },
+        ]
+      );
+    }
+  };
+
 
   const handleSyncNow = async () => {
     const res = await syncNow();
@@ -1006,16 +1065,37 @@ export const SettingsScreen: React.FC = () => {
                     onPress={handleLogout}
                     style={({ pressed }) => [
                       styles.signOutActionBtn,
-                      { backgroundColor: theme.dangerLight },
+                      { backgroundColor: theme.surfaceSubtle, borderColor: theme.border, borderWidth: 1 },
                       pressed && { opacity: 0.8 },
                     ]}
                   >
-                    <Ionicons name="log-out-outline" size={15} color={theme.danger} />
-                    <Text style={[styles.signOutActionBtnText, { color: theme.danger }]}>
+                    <Ionicons name="log-out-outline" size={15} color={theme.text} />
+                    <Text style={[styles.signOutActionBtnText, { color: theme.text }]}>
                       {t('signOut')}
                     </Text>
                   </Pressable>
                 </View>
+
+                {/* Account & Data Deletion */}
+                <Pressable
+                  onPress={handleDeleteAccount}
+                  disabled={isDeletingAccount}
+                  style={({ pressed }) => [
+                    styles.deleteAccountBtn,
+                    { backgroundColor: theme.dangerLight, borderColor: '#FCA5A5', borderWidth: 1 },
+                    (pressed || isDeletingAccount) && { opacity: 0.8 },
+                  ]}
+                >
+                  {isDeletingAccount ? (
+                    <ActivityIndicator size="small" color={theme.danger} />
+                  ) : (
+                    <Ionicons name="trash-outline" size={14} color={theme.danger} />
+                  )}
+                  <Text style={[styles.deleteAccountBtnText, { color: theme.danger }]}>
+                    {isDeletingAccount ? t('deletingAccount') : t('deleteAccount')}
+                  </Text>
+                </Pressable>
+
               </View>
             )}
           </Section>
@@ -1199,6 +1279,46 @@ export const SettingsScreen: React.FC = () => {
               </Pressable>
             </View>
           )}
+          {/* About & Legal Section */}
+          <Section title={t('aboutLegal')} theme={theme}>
+            <RowItem
+              icon="shield-checkmark-outline"
+              iconColor="#2563EB"
+              iconBg="#DBEAFE"
+              label={t('privacyPolicy')}
+              sublabel="View official privacy disclosures"
+              onPress={() => openLegalUrl(LEGAL_CONFIG.privacyPolicyUrl)}
+              theme={theme}
+            />
+            <RowItem
+              icon="document-text-outline"
+              iconColor="#0D9488"
+              iconBg="#CCFBF1"
+              label={t('termsOfService')}
+              sublabel="View terms of service"
+              onPress={() => openLegalUrl(LEGAL_CONFIG.termsOfServiceUrl)}
+              theme={theme}
+            />
+            <RowItem
+              icon="trash-bin-outline"
+              iconColor="#DC2626"
+              iconBg="#FEE2E2"
+              label="Account & Data Deletion Portal"
+              sublabel="Online data erasure request"
+              onPress={() => openLegalUrl(LEGAL_CONFIG.accountDeletionUrl)}
+              theme={theme}
+            />
+            <RowItem
+              icon="information-circle-outline"
+              iconColor="#64748B"
+              iconBg="#F1F5F9"
+              label="App Version"
+              sublabel={`v${LEGAL_CONFIG.appVersion} (${LEGAL_CONFIG.packageName})`}
+              theme={theme}
+              last
+            />
+          </Section>
+
         </>
       )}
 
@@ -1621,6 +1741,21 @@ const styles = StyleSheet.create({
     fontSize: 13,
     fontWeight: '700',
   },
+  deleteAccountBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 6,
+    paddingVertical: 9,
+    paddingHorizontal: Spacing.md,
+    borderRadius: BorderRadius.full,
+    marginTop: Spacing.xs,
+  },
+  deleteAccountBtnText: {
+    fontSize: 12,
+    fontWeight: '700',
+  },
+
   cloudTopBanner: {
     flexDirection: 'row',
     alignItems: 'center',

@@ -8,7 +8,9 @@ import {
   getDoc,
   serverTimestamp 
 } from 'firebase/firestore';
-import { db } from '@/config/firebase';
+import { db, storage } from '@/config/firebase';
+import { ref, listAll, deleteObject } from 'firebase/storage';
+
 import { Product, Sale, CustomerKhata, KhataTransaction, Payment, ShopSettings, SyncQueueItem } from '@/types';
 
 /**
@@ -323,3 +325,88 @@ export async function executeBatchCloudQueue(
 
   return { succeededIds, failedIds };
 }
+/**
+ * Permanently deletes all cloud data associated with the user:
+ * - products, sales, customers, khata_transactions, payments, settings
+ * - user shop root document
+ * Required for Play Store Account Deletion policy compliance.
+ */
+export async function deleteAllUserCloudData(userId: string): Promise<{ success: boolean; error?: string }> {
+  if (!userId) return { success: false, error: 'User ID is required.' };
+
+  const subcollections = ['products', 'sales', 'customers', 'khata_transactions', 'payments', 'settings'];
+
+  try {
+    for (const colName of subcollections) {
+      const colRef = getShopCollection(userId, colName);
+      const snap = await getDocs(colRef);
+      if (!snap.empty) {
+        // Delete in batches of 400
+        const CHUNK_SIZE = 400;
+        for (let i = 0; i < snap.docs.length; i += CHUNK_SIZE) {
+          const chunk = snap.docs.slice(i, i + CHUNK_SIZE);
+          const batch = writeBatch(db);
+          for (const d of chunk) {
+            batch.delete(d.ref);
+          }
+          await batch.commit();
+        }
+      }
+    }
+
+    // Delete shop profile document itself
+    const shopRootRef = doc(db, 'shops', userId);
+    await deleteDoc(shopRootRef);
+
+    // Recursively delete all Firebase Storage files under shops/{userId}/ (if storage is provisioned)
+    try {
+      const userStorageRoot = ref(storage, `shops/${userId}`);
+      await deleteStorageFolderRecursively(userStorageRoot);
+    } catch (storageErr: any) {
+      if (
+        storageErr?.code === 'storage/bucket-not-found' ||
+        storageErr?.code === 'storage/project-not-found'
+      ) {
+        console.log('[FirestoreService] Firebase Storage bucket not configured on project; skipped.');
+      } else {
+        console.error('[FirestoreService] Firebase Storage clean-up failed:', storageErr);
+        return {
+          success: false,
+          error:
+            storageErr?.message ||
+            'Failed to delete Firebase Storage files. Account was not deleted so you can retry.',
+        };
+      }
+    }
+
+    return { success: true };
+  } catch (err: any) {
+    console.error('[FirestoreService] deleteAllUserCloudData error:', err);
+    return { success: false, error: err?.message || 'Failed to delete cloud documents.' };
+  }
+}
+
+/**
+ * Recursively deletes all files and subfolders under a Firebase Storage reference.
+ */
+async function deleteStorageFolderRecursively(folderRef: any): Promise<void> {
+  try {
+    const listResult = await listAll(folderRef);
+    const filePromises = listResult.items.map((item) => deleteObject(item));
+    const folderPromises = listResult.prefixes.map((prefix) => deleteStorageFolderRecursively(prefix));
+    await Promise.all([...filePromises, ...folderPromises]);
+  } catch (err: any) {
+    // Empty / missing folder or unconfigured storage bucket is fine — nothing to delete.
+    if (
+      err?.code === 'storage/object-not-found' ||
+      err?.code === 'storage/not-found' ||
+      err?.code === 'storage/bucket-not-found' ||
+      err?.code === 'storage/project-not-found'
+    ) {
+      return;
+    }
+    console.error('[FirestoreService] Firebase Storage folder delete failed:', err?.message || err);
+    throw err;
+  }
+}
+

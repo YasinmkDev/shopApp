@@ -10,6 +10,8 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import { useShop } from '@/context/ShopContext';
 import { Colors, Spacing, BorderRadius, Shadows } from '@/constants/theme';
+import { LEGAL_CONFIG, openLegalUrl } from '@/constants/legal';
+
 
 interface LoginScreenProps {
   onContinueAsGuest: () => void;
@@ -49,6 +51,7 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({ onContinueAsGuest }) =
   return (
     <View style={[styles.rootContainer, { backgroundColor: theme.background }]}>
       <ScrollView
+        style={styles.scrollView}
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
         keyboardShouldPersistTaps="handled"
@@ -107,7 +110,7 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({ onContinueAsGuest }) =
           <View style={styles.brandSection}>
             <View style={[styles.logoOuter, { backgroundColor: theme.primaryLight }]}>
               <View style={[styles.logoInner, { backgroundColor: theme.primary }]}>
-                <Ionicons name="storefront" size={36} color="#FFFFFF" />
+                <Ionicons name="storefront" size={26} color="#FFFFFF" />
               </View>
             </View>
 
@@ -125,7 +128,7 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({ onContinueAsGuest }) =
           {/* Error Banner */}
           {errorMessage ? (
             <View style={[styles.banner, styles.errorBanner]}>
-              <Ionicons name="alert-circle" size={18} color="#B91C1C" />
+              <Ionicons name="alert-circle" size={16} color="#B91C1C" />
               <Text style={styles.errorBannerText}>{errorMessage}</Text>
             </View>
           ) : null}
@@ -134,7 +137,7 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({ onContinueAsGuest }) =
           <View style={styles.featuresContainer}>
             <View style={[styles.featureCard, { backgroundColor: theme.surfaceSubtle, borderColor: theme.border }]}>
               <View style={[styles.featureIcon, { backgroundColor: '#E0F2FE' }]}>
-                <Ionicons name="flash-outline" size={20} color="#0284C7" />
+                <Ionicons name="flash-outline" size={16} color="#0284C7" />
               </View>
               <View style={styles.featureTextWrap}>
                 <Text style={[styles.featureTitle, { color: theme.text }]}>
@@ -148,7 +151,7 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({ onContinueAsGuest }) =
 
             <View style={[styles.featureCard, { backgroundColor: theme.surfaceSubtle, borderColor: theme.border }]}>
               <View style={[styles.featureIcon, { backgroundColor: '#FEF3C7' }]}>
-                <Ionicons name="book-outline" size={20} color="#D97706" />
+                <Ionicons name="book-outline" size={16} color="#D97706" />
               </View>
               <View style={styles.featureTextWrap}>
                 <Text style={[styles.featureTitle, { color: theme.text }]}>
@@ -162,7 +165,7 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({ onContinueAsGuest }) =
 
             <View style={[styles.featureCard, { backgroundColor: theme.surfaceSubtle, borderColor: theme.border }]}>
               <View style={[styles.featureIcon, { backgroundColor: '#DCFCE7' }]}>
-                <Ionicons name="cloud-done-outline" size={20} color="#15803D" />
+                <Ionicons name="cloud-done-outline" size={16} color="#15803D" />
               </View>
               <View style={styles.featureTextWrap}>
                 <Text style={[styles.featureTitle, { color: theme.text }]}>
@@ -189,16 +192,16 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({ onContinueAsGuest }) =
               {isLoading ? (
                 <View style={styles.loadingRow}>
                   <ActivityIndicator size="small" color="#FFFFFF" />
-                  <Text style={styles.googleBtnText}>
+                  <Text style={styles.googleBtnText} numberOfLines={1}>
                     {isUrdu ? 'گوگل سے تصدیق ہو رہی ہے...' : 'Signing in with Google...'}
                   </Text>
                 </View>
               ) : (
                 <View style={styles.googleBtnInner}>
                   <View style={styles.googleIconCircle}>
-                    <Ionicons name="logo-google" size={20} color="#EA4335" />
+                    <Ionicons name="logo-google" size={14} color="#EA4335" />
                   </View>
-                  <Text style={styles.googleBtnText}>
+                  <Text style={styles.googleBtnText} numberOfLines={1} ellipsizeMode="tail">
                     {isUrdu ? 'گوگل اکاؤنٹ سے لاگ ان کریں' : 'Continue with Google'}
                   </Text>
                 </View>
@@ -223,23 +226,38 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({ onContinueAsGuest }) =
                 pressed && { opacity: 0.75, backgroundColor: theme.border },
               ]}
             >
-              <Ionicons name="enter-outline" size={20} color={theme.text} />
-              <Text style={[styles.guestBtnText, { color: theme.text }]}>
+              <Ionicons name="enter-outline" size={16} color={theme.text} />
+              <Text style={[styles.guestBtnText, { color: theme.text }]} numberOfLines={1} ellipsizeMode="tail">
                 {isUrdu ? 'آف لائن دکان شروع کریں (گیسٹ موڈ)' : 'Continue as Guest (Offline Mode)'}
               </Text>
-              <Ionicons name="chevron-forward" size={16} color={theme.textMuted} />
+              <Ionicons name="chevron-forward" size={14} color={theme.textMuted} />
             </Pressable>
           </View>
 
-          {/* Footer Security Note */}
+          {/* Footer Security Note & Privacy Policy */}
           <View style={styles.footerWrap}>
-            <Ionicons name="lock-closed" size={14} color="#64748B" />
+            <Ionicons name="lock-closed" size={13} color="#64748B" />
             <Text style={[styles.footerText, { color: theme.textMuted }]}>
               {isUrdu
                 ? 'آپ کا ریکارڈ محفوظ اور انکرپٹڈ ہے • گوگل فائر بیس کلاؤڈ'
                 : 'Encrypted & secured by Firebase Authentication'}
             </Text>
           </View>
+
+          <View style={styles.legalLinksRow}>
+            <Pressable onPress={() => openLegalUrl(LEGAL_CONFIG.privacyPolicyUrl)}>
+              <Text style={[styles.legalLinkText, { color: theme.primary }]}>
+                {isUrdu ? 'پرائیویسی پالیسی' : 'Privacy Policy'}
+              </Text>
+            </Pressable>
+            <Text style={[styles.legalDot, { color: theme.textMuted }]}>•</Text>
+            <Pressable onPress={() => openLegalUrl(LEGAL_CONFIG.termsOfServiceUrl)}>
+              <Text style={[styles.legalLinkText, { color: theme.primary }]}>
+                {isUrdu ? 'شرائط و ضوابط' : 'Terms of Service'}
+              </Text>
+            </Pressable>
+          </View>
+
         </View>
       </ScrollView>
     </View>
@@ -250,47 +268,52 @@ const styles = StyleSheet.create({
   rootContainer: {
     flex: 1,
     width: '100%',
-    height: '100%',
-    justifyContent: 'center',
-    alignItems: 'center',
+    overflow: 'hidden',
+  },
+  scrollView: {
+    flex: 1,
+    width: '100%',
   },
   scrollContent: {
     flexGrow: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    padding: Spacing.lg,
+    paddingHorizontal: 16,
+    paddingVertical: 16,
     width: '100%',
   },
   card: {
     width: '100%',
-    maxWidth: 480,
+    maxWidth: 400,
+    alignSelf: 'center',
     borderRadius: BorderRadius.xl,
     borderWidth: 1,
-    padding: Spacing.xl,
-    ...Shadows.lg,
+    paddingHorizontal: 16,
+    paddingVertical: 18,
+    ...Shadows.md,
   },
   topBar: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: Spacing.lg,
+    marginBottom: 12,
   },
   statusBadge: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 6,
-    paddingHorizontal: 10,
-    paddingVertical: 4,
+    gap: 5,
+    paddingHorizontal: 8,
+    paddingVertical: 3,
     borderRadius: BorderRadius.full,
   },
   onlineDot: {
-    width: 7,
-    height: 7,
+    width: 6,
+    height: 6,
     borderRadius: BorderRadius.full,
     backgroundColor: '#16A34A',
   },
   statusBadgeText: {
-    fontSize: 12,
+    fontSize: 11,
     fontWeight: '700',
     color: '#15803D',
   },
@@ -301,15 +324,15 @@ const styles = StyleSheet.create({
     padding: 2,
   },
   langOption: {
-    paddingHorizontal: 12,
-    paddingVertical: 4,
+    paddingHorizontal: 10,
+    paddingVertical: 3,
     borderRadius: BorderRadius.full,
   },
   langOptionActive: {
     ...Shadows.sm,
   },
   langText: {
-    fontSize: 12,
+    fontSize: 11,
     fontWeight: '600',
   },
   langTextBold: {
@@ -317,44 +340,44 @@ const styles = StyleSheet.create({
   },
   brandSection: {
     alignItems: 'center',
-    marginBottom: Spacing.xl,
+    marginBottom: 14,
   },
   logoOuter: {
-    width: 76,
-    height: 76,
+    width: 58,
+    height: 58,
     borderRadius: BorderRadius.full,
     alignItems: 'center',
     justifyContent: 'center',
-    marginBottom: Spacing.md,
+    marginBottom: 8,
   },
   logoInner: {
-    width: 60,
-    height: 60,
+    width: 44,
+    height: 44,
     borderRadius: BorderRadius.full,
     alignItems: 'center',
     justifyContent: 'center',
-    ...Shadows.md,
+    ...Shadows.sm,
   },
   appTitle: {
-    fontSize: 26,
+    fontSize: 21,
     fontWeight: '900',
-    letterSpacing: -0.5,
+    letterSpacing: -0.4,
     textAlign: 'center',
   },
   appSubtitle: {
-    fontSize: 13,
-    marginTop: 6,
+    fontSize: 12,
+    marginTop: 4,
     textAlign: 'center',
-    lineHeight: 19,
-    paddingHorizontal: Spacing.md,
+    lineHeight: 17,
+    paddingHorizontal: 4,
   },
   banner: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: Spacing.sm,
-    padding: Spacing.md,
+    padding: 10,
     borderRadius: BorderRadius.md,
-    marginBottom: Spacing.md,
+    marginBottom: 10,
   },
   errorBanner: {
     backgroundColor: '#FEE2E2',
@@ -363,26 +386,26 @@ const styles = StyleSheet.create({
   },
   errorBannerText: {
     color: '#991B1B',
-    fontSize: 13,
+    fontSize: 12,
     fontWeight: '600',
     flex: 1,
   },
   featuresContainer: {
-    gap: Spacing.sm,
-    marginBottom: Spacing.xl,
+    gap: 6,
+    marginBottom: 14,
   },
   featureCard: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: Spacing.md,
-    padding: Spacing.md,
-    borderRadius: BorderRadius.lg,
+    gap: 10,
+    padding: 9,
+    borderRadius: BorderRadius.md,
     borderWidth: 1,
   },
   featureIcon: {
-    width: 38,
-    height: 38,
-    borderRadius: BorderRadius.md,
+    width: 30,
+    height: 30,
+    borderRadius: BorderRadius.sm,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -390,38 +413,41 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   featureTitle: {
-    fontSize: 14,
+    fontSize: 12,
     fontWeight: '700',
   },
   featureDesc: {
-    fontSize: 12,
-    marginTop: 2,
+    fontSize: 11,
+    marginTop: 1,
+    lineHeight: 14,
   },
   actionSection: {
-    gap: Spacing.md,
+    gap: 8,
   },
   googleBtn: {
     backgroundColor: '#0F172A',
-    paddingVertical: 14,
-    paddingHorizontal: Spacing.lg,
-    borderRadius: BorderRadius.lg,
+    paddingVertical: 10,
+    paddingHorizontal: 12,
+    borderRadius: BorderRadius.md,
     alignItems: 'center',
     justifyContent: 'center',
-    ...Shadows.md,
+    ...Shadows.sm,
   },
   googleBtnInner: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: Spacing.md,
+    justifyContent: 'center',
+    gap: 8,
   },
   loadingRow: {
     flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'center',
     gap: Spacing.sm,
   },
   googleIconCircle: {
-    width: 28,
-    height: 28,
+    width: 22,
+    height: 22,
     borderRadius: BorderRadius.full,
     backgroundColor: '#FFFFFF',
     alignItems: 'center',
@@ -429,49 +455,65 @@ const styles = StyleSheet.create({
   },
   googleBtnText: {
     color: '#FFFFFF',
-    fontSize: 15,
+    fontSize: 13,
     fontWeight: '700',
-    letterSpacing: 0.2,
+    letterSpacing: 0.1,
   },
   dividerRow: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: Spacing.sm,
-    marginVertical: 4,
+    marginVertical: 2,
   },
   dividerLine: {
     flex: 1,
     height: 1,
   },
   dividerText: {
-    fontSize: 11,
+    fontSize: 10,
     fontWeight: '700',
     textTransform: 'uppercase',
   },
   guestBtn: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingVertical: 13,
-    paddingHorizontal: Spacing.lg,
-    borderRadius: BorderRadius.lg,
+    justifyContent: 'center',
+    paddingVertical: 9,
+    paddingHorizontal: 12,
+    borderRadius: BorderRadius.md,
     borderWidth: 1,
+    gap: 6,
   },
   guestBtnText: {
-    fontSize: 13,
-    fontWeight: '700',
-    flex: 1,
-    marginHorizontal: Spacing.sm,
+    fontSize: 12,
+    fontWeight: '600',
+    flexShrink: 1,
+    textAlign: 'center',
   },
   footerWrap: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    gap: 6,
-    marginTop: Spacing.xl,
+    gap: 5,
+    marginTop: 12,
   },
   footerText: {
-    fontSize: 11,
+    fontSize: 10,
     textAlign: 'center',
+  },
+  legalLinksRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+    marginTop: 4,
+  },
+  legalLinkText: {
+    fontSize: 11,
+    fontWeight: '600',
+    textDecorationLine: 'underline',
+  },
+  legalDot: {
+    fontSize: 11,
   },
 });

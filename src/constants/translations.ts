@@ -210,10 +210,18 @@ export const Translations = {
     syncError: 'Cloud Sync Failed',
     signOut: 'Sign Out',
     signedInAs: 'Signed in as',
+    deleteAccount: 'Delete Account & Cloud Data',
+    deleteAccountConfirm: 'Permanently delete your account and synced Firebase cloud data? (Any files already saved in your Google Drive will remain under your control). This action CANNOT be undone.',
+    deleteAccountSuccess: 'Your account and Firebase cloud records have been permanently deleted. (Any files in your Google Drive remain under your control).',
+    deletingAccount: 'Deleting account & cloud data...',
+    aboutLegal: 'About & Legal',
+    privacyPolicy: 'Privacy Policy',
+    termsOfService: 'Terms of Service',
+
 
     // Google Drive Storage
     googleDriveTitle: 'Google Drive Storage',
-    googleDriveDesc: 'Store high-resolution product photos and automated shop backups directly in your Google Drive.',
+    googleDriveDesc: 'Store high-resolution product photos and backups directly in your Google Drive — syncs when store data changes.',
     connectDrive: 'Connect Google Drive',
     disconnectDrive: 'Disconnect Google Drive',
     driveConnected: 'Google Drive Connected',
@@ -458,10 +466,18 @@ export const Translations = {
     syncError: 'کلاؤڈ محفوظ کرنے میں خرابی',
     signOut: 'لاگ آؤٹ',
     signedInAs: 'لاگ ان بطور',
+    deleteAccount: 'اکاؤنٹ اور کلاؤڈ ڈیٹا ڈیلیٹ کریں',
+    deleteAccountConfirm: 'کیا آپ واقعی اپنا اکاؤنٹ اور فائر بیس کلاؤڈ ڈیٹا مستقل طور پر ختم کرنا چاہتے ہیں؟ (گوگل ڈرائیو میں موجود سابقہ فائلیں آپ کے پاس محفوظ رہیں گی)۔ یہ عمل واپس نہیں ہو سکتا۔',
+    deleteAccountSuccess: 'آپ کا اکاؤنٹ اور فائر بیس کلاؤڈ ڈیٹا مستقل طور پر ڈیلیٹ کر دیا گیا ہے۔ (گوگل ڈرائیو کی فائلیں آپ کے پاس محفوظ ہیں)۔',
+    deletingAccount: 'اکاؤنٹ اور کلاؤڈ ڈیٹا ختم ہو رہا ہے...',
+    aboutLegal: 'ایپ اور قانونی معلومات',
+    privacyPolicy: 'پرائیویسی پالیسی',
+    termsOfService: 'شرائط و ضوابط',
+
 
     // Google Drive Storage
     googleDriveTitle: 'گوگل ڈرائیو (کلاؤڈ اسٹوریج)',
-    googleDriveDesc: 'پروڈکٹس کی تصاویر اور دکان کا مکمل بیک اپ اپنی گوگل ڈرائیو میں محفوظ کریں۔',
+    googleDriveDesc: 'پروڈکٹس کی تصاویر اور بیک اپ اپنی گوگل ڈرائیو میں محفوظ کریں — دکان کا ڈیٹا تبدیل ہونے پر خودکار ہم آہنگ۔',
     connectDrive: 'گوگل ڈرائیو کنیکٹ کریں',
     disconnectDrive: 'گوگل ڈرائیو منقطع کریں',
     driveConnected: 'گوگل ڈرائیو منسلک ہے',
